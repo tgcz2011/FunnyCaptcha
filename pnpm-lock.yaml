@@ -24,6 +24,18 @@ importers:
         specifier: ^2.1.5
         version: 2.1.9(@types/node@22.20.1)
 
+  packages/captchas/math:
+    dependencies:
+      '@funnycaptcha/core':
+        specifier: workspace:*
+        version: link:../../core
+
+  packages/captchas/text-distort:
+    dependencies:
+      '@funnycaptcha/core':
+        specifier: workspace:*
+        version: link:../../core
+
   packages/core: {}
 
 packages:
