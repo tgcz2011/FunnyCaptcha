@@ -1,0 +1,57 @@
+{
+  "title": "FunnyChapter",
+  "subtitle": "A Playful Captcha Collection",
+  "tagline": "10 captchas · 3 integration ways · zero config",
+  "description": "An open-source captcha collection covering five categories — interactive, recognize, creative, mini-game and anti-bot satire. Available via npm package, script embed, or source copy.",
+  "categories": {
+    "interactive": {
+      "label": "Interactive",
+      "desc": "Drag, click, rotate — operation-based captchas"
+    },
+    "recognize": {
+      "label": "Recognize",
+      "desc": "Distorted text, image-text recognition classics"
+    },
+    "creative": {
+      "label": "Creative",
+      "desc": "Emoji match, meme quiz — out-of-the-box ideas"
+    },
+    "game": {
+      "label": "Mini Game",
+      "desc": "Pass a level or score enough to proceed"
+    },
+    "anti-bot": {
+      "label": "Anti-Bot Satire",
+      "desc": "Deliberately lets bots inject JS to pass — irony"
+    }
+  },
+  "actions": {
+    "try": "Try it",
+    "docs": "Docs",
+    "source": "Source",
+    "back": "Back to home",
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "nav": {
+    "home": "Home",
+    "docs": "Docs",
+    "github": "GitHub"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "footer": {
+    "license": "MIT License",
+    "built": "Built by the community"
+  },
+  "demo": {
+    "refresh": "New challenge",
+    "verify": "Verify",
+    "success": "Passed!",
+    "fail": "Try again",
+    "placeholder": "Type your answer"
+  }
+}
