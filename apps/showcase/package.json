@@ -18,6 +18,14 @@
     "@funnycaptcha/core": "workspace:*",
     "@funnycaptcha/math": "workspace:*",
     "@funnycaptcha/text-distort": "workspace:*",
+    "@funnycaptcha/slider": "workspace:*",
+    "@funnycaptcha/click-order": "workspace:*",
+    "@funnycaptcha/rotate": "workspace:*",
+    "@funnycaptcha/spot-diff": "workspace:*",
+    "@funnycaptcha/emoji-match": "workspace:*",
+    "@funnycaptcha/meme-quiz": "workspace:*",
+    "@funnycaptcha/mini-game": "workspace:*",
+    "@funnycaptcha/anti-bot": "workspace:*",
     "@funnycaptcha/react": "workspace:*"
   },
   "devDependencies": {

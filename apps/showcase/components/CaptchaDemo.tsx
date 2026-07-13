@@ -5,12 +5,28 @@ import { useTranslations, useLocale } from 'next-intl';
 import { CaptchaHost } from '@funnycaptcha/react';
 import { mathPlugin } from '@funnycaptcha/math';
 import { textDistortPlugin } from '@funnycaptcha/text-distort';
+import { sliderPlugin } from '@funnycaptcha/slider';
+import { clickOrderPlugin } from '@funnycaptcha/click-order';
+import { rotatePlugin } from '@funnycaptcha/rotate';
+import { spotDiffPlugin } from '@funnycaptcha/spot-diff';
+import { emojiMatchPlugin } from '@funnycaptcha/emoji-match';
+import { memeQuizPlugin } from '@funnycaptcha/meme-quiz';
+import { miniGamePlugin } from '@funnycaptcha/mini-game';
+import { antiBotPlugin } from '@funnycaptcha/anti-bot';
 import type { CaptchaPlugin, CaptchaResult } from '@funnycaptcha/core';
 import { getMeta } from '@/lib/catalog';
 
 const PLUGINS: Record<string, CaptchaPlugin> = {
   math: mathPlugin,
   'text-distort': textDistortPlugin,
+  slider: sliderPlugin,
+  'click-order': clickOrderPlugin,
+  rotate: rotatePlugin,
+  'spot-diff': spotDiffPlugin,
+  'emoji-match': emojiMatchPlugin,
+  'meme-quiz': memeQuizPlugin,
+  'mini-game': miniGamePlugin,
+  'anti-bot': antiBotPlugin,
 };
 
 export function CaptchaDemo({ type }: { type: string }) {

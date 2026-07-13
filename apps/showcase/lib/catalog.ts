@@ -49,7 +49,7 @@ export const catalog: CaptchaMeta[] = [
       zh: '把滑块拖到最右端，简单粗暴的交互验证。',
       en: 'Drag the slider to the rightmost position.',
     },
-    available: false,
+    available: true,
     pkg: '@funnycaptcha/slider',
   },
   {
@@ -60,7 +60,7 @@ export const catalog: CaptchaMeta[] = [
       zh: '按提示顺序点击图中的目标文字或图标。',
       en: 'Click the targets in the prompted order.',
     },
-    available: false,
+    available: true,
     pkg: '@funnycaptcha/click-order',
   },
   {
@@ -71,7 +71,7 @@ export const catalog: CaptchaMeta[] = [
       zh: '旋转图片让两半拼成完整图案。',
       en: 'Rotate the image to align the two halves.',
     },
-    available: false,
+    available: true,
     pkg: '@funnycaptcha/rotate',
   },
   {
@@ -82,7 +82,7 @@ export const catalog: CaptchaMeta[] = [
       zh: '在两张相似图中找出 N 处不同。',
       en: 'Find N differences between two similar images.',
     },
-    available: false,
+    available: true,
     pkg: '@funnycaptcha/spot-diff',
   },
   {
@@ -93,7 +93,7 @@ export const catalog: CaptchaMeta[] = [
       zh: '选出与描述相符的 emoji。',
       en: 'Pick the emoji matching the description.',
     },
-    available: false,
+    available: true,
     pkg: '@funnycaptcha/emoji-match',
   },
   {
@@ -104,7 +104,7 @@ export const catalog: CaptchaMeta[] = [
       zh: '看梗图选梗名，懂的人自然懂。',
       en: 'Pick the right meme name. Only the cultured pass.',
     },
-    available: false,
+    available: true,
     pkg: '@funnycaptcha/meme-quiz',
   },
   {
@@ -115,7 +115,7 @@ export const catalog: CaptchaMeta[] = [
       zh: '在 30 秒内达到指定分数才放行。',
       en: 'Reach the target score within 30 seconds.',
     },
-    available: false,
+    available: true,
     pkg: '@funnycaptcha/mini-game',
   },
   {
@@ -126,7 +126,7 @@ export const catalog: CaptchaMeta[] = [
       zh: '故意留个口子，机器人注入一行 JS 就能通过——讽刺那些假装安全的验证码。',
       en: 'Deliberately lets bots inject one line of JS to pass — a satire on fake-security captchas.',
     },
-    available: false,
+    available: true,
     pkg: '@funnycaptcha/anti-bot',
   },
 ];
