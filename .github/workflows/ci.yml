@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build core
+        run: pnpm --filter @funnycaptcha/core build
+
+      - name: Build captchas
+        run: pnpm -r --filter "./packages/captchas/*" build
+
+      - name: Build react
+        run: pnpm --filter @funnycaptcha/react build
+
+      - name: Build embed
+        run: pnpm --filter @funnycaptcha/embed build
+
+      - name: Typecheck
+        run: pnpm -r typecheck
+
+      - name: Test
+        run: pnpm -r test
