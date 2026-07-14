@@ -4,15 +4,17 @@ export interface PuzzleChallenge {
   gapPosition: number;
 }
 
-const TOLERANCE = 5; // ±5%
+const TOLERANCE = 8; // ±8%（圆形路径更难精确对齐）
 
 function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// 生成题目：缺口位置在 10-90 之间（避免贴边导致题目退化）
+// 生成题目：缺口位置限制在 piece 圆形路径可达范围内
+// piece x = cx + radius*cos(angle) - PIECE_W/2，百分比范围约 19%-64%
+// gap 限制在 25-58 确保 piece 一定能对齐
 export function generateChallenge(): PuzzleChallenge {
-  return { gapPosition: randInt(10, 90) };
+  return { gapPosition: randInt(25, 58) };
 }
 
 // 构造 proof 输入串：gapPosition + ':completed'

@@ -15,13 +15,18 @@ const HANDLE_H = 36;
 
 // 螺旋参数：阿基米德螺旋 r = a + b*θ
 // 从外向内，θ 从 0 到 6π（3 圈）
+// 半径受画布限制：CY=100，留 8px 边距，r_max ≤ 92
+// r_max = SPIRAL_B * SPIRAL_THETA_MAX = 5 * 6π ≈ 94.2
 const SPIRAL_THETA_MAX = 6 * Math.PI;
-const SPIRAL_A = 8;   // 起始半径
-const SPIRAL_B = 8;   // 每圈半径增量
+const SPIRAL_A = 0;   // 起始半径（0 = 终点在正中心）
+const SPIRAL_B = 5;   // 每圈半径增量（调小以适配画布）
 
 // 中心点
 const CX = CANVAS_W / 2;
 const CY = CANVAS_H / 2;
+
+// 螺旋外端最大半径（用于极坐标距离映射）
+const SPIRAL_R_MAX = SPIRAL_B * SPIRAL_THETA_MAX;
 
 // 预生成螺旋路径点（从外向内，用户从外端开始拖到中心）
 function spiralPoints(): { x: number; y: number; theta: number }[] {
@@ -131,11 +136,6 @@ export function createSliderInstance(
     let startProgress = 0;
     let currentProgress = 0; // 0 = 外端, 1 = 中心
 
-    // stage 的实际像素尺寸（用于把 SVG 坐标转换为屏幕坐标）
-    const stageRect = stage.getBoundingClientRect();
-    const scaleX = stageRect.width / CANVAS_W;
-    const scaleY = stageRect.height / CANVAS_H;
-
     function applyProgress(p: number) {
       currentProgress = Math.max(0, Math.min(1, p));
       const pt = pointAtProgress(pts, currentProgress);
@@ -172,29 +172,26 @@ export function createSliderInstance(
 
     handle.addEventListener('pointermove', (e) => {
       if (!dragging) return;
-      // 计算鼠标移动向量
-      const dx = e.clientX - startPointer.x;
-      const dy = e.clientY - startPointer.y;
-      // 移动距离（像素），取水平+垂直的综合距离
-      // 用户需要向中心方向拖动，我们用总移动量 / 螺旋总长度 来估算进度
-      // 螺旋总长度 ≈ stage 对角线 * 3 圈
-      const spiralLen = stageRect.width * 2.5; // 估算值
-      const moved = Math.sqrt(dx * dx + dy * dy);
-      // 方向：向左/上拖动 = 向中心（外端在右下，中心在中间）
-      // 但螺旋路径方向复杂，我们简化：鼠标移动距离越大概率进度越大
-      // 为了让方向有约束，只取朝向中心的分量
-      const currentPt = pointAtProgress(pts, startProgress);
-      const currentScreenX = stageRect.left + currentPt.x * scaleX;
-      const currentScreenY = stageRect.top + currentPt.y * scaleY;
-      // 朝向中心的向量
-      const toCenterX = stageRect.left + CX * scaleX - currentScreenX;
-      const toCenterY = stageRect.top + CY * scaleY - currentScreenY;
-      const toCenterLen = Math.sqrt(toCenterX * toCenterX + toCenterY * toCenterY) || 1;
-      // 鼠标移动在朝向中心方向的投影
-      const projection = (dx * toCenterX + dy * toCenterY) / toCenterLen;
-      const deltaProgress = projection / spiralLen;
-      const newProgress = startProgress + deltaProgress;
-      applyProgress(newProgress);
+      // 极坐标距离映射：鼠标到中心的距离 r → 螺旋进度
+      // 阿基米德螺旋 r = SPIRAL_B * theta，theta 从 theta_max(外) 到 0(中心)
+      // progress = 1 - theta/theta_max = 1 - r/r_max
+      // 鼠标越接近中心 → r 越小 → progress 越接近 1（终点）
+      // 鼠标越远离中心 → r 越大 → progress 越接近 0（起点）
+      // 实时获取 stage 坐标（避免页面滚动后 stageRect 过时）
+      const rect = stage.getBoundingClientRect();
+      const sx = rect.width / CANVAS_W;
+      const sy = rect.height / CANVAS_H;
+      const svgX = (e.clientX - rect.left) / sx;
+      const svgY = (e.clientY - rect.top) / sy;
+      const dx = svgX - CX;
+      const dy = svgY - CY;
+      const r = Math.sqrt(dx * dx + dy * dy);
+      const progress = 1 - r / SPIRAL_R_MAX;
+      // 平滑推进：限制单步变化幅度，避免抖动跨越圈
+      const step = progress - currentProgress;
+      const maxStep = 0.08; // 单次最多推进 8%
+      const clampedStep = Math.max(-maxStep, Math.min(maxStep, step));
+      applyProgress(currentProgress + clampedStep);
       recorder.record(e.clientX, e.clientY);
     });
 
@@ -204,7 +201,7 @@ export function createSliderInstance(
       const trackPoints = recorder.stop();
 
       // a. 位置判定：进度 >= 0.92 算到达中心
-      if (currentProgress < 0.92) {
+      if (currentProgress < 0.85) {
         bounceBack();
         msg.style.color = 'var(--fc-danger)';
         msg.textContent = t.fail;

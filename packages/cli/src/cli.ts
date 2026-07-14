@@ -114,7 +114,11 @@ function getDemoHTML(): string {
       { type: 'anti-bot', zh: '反人类讽刺', en: 'Anti-Bot Satire', descZh: '机器人注入 JS 就能通过', descEn: 'Bots can inject JS to pass' },
       { type: 'click-text', zh: '文字点选', en: 'Click Text', descZh: '按顺序点击指定汉字', descEn: 'Click characters in order' },
       { type: 'color-pick', zh: '颜色选择', en: 'Color Pick', descZh: '点击指定颜色的方块', descEn: 'Pick the right color' },
-      { type: 'puzzle', zh: '拼图缺口', en: 'Puzzle Gap', descZh: '拖动拼图到缺口位置', descEn: 'Drag puzzle to the gap' }
+      { type: 'puzzle', zh: '拼图缺口', en: 'Puzzle Gap', descZh: '拖动拼图到缺口位置', descEn: 'Drag puzzle to the gap' },
+      { type: 'advanced-math', zh: '高等数学', en: 'Calculus', descZh: '求导、积分、极限', descEn: 'Derivatives, integrals, limits' },
+      { type: 'olympiad', zh: '小学奥数', en: 'Math Olympiad', descZh: '鸡兔同笼、植树、行程', descEn: 'Classic word problems' },
+      { type: 'equation-balance', zh: '方程式配平', en: 'Balance Equation', descZh: '配平化学方程式系数', descEn: 'Balance chemical equations' },
+      { type: 'random-hunt', zh: '随机数猎手', en: 'Random Hunter', descZh: '数字满足条件时捕获', descEn: 'Catch the number when it matches' }
     ];
     var locale = 'zh';
     var theme = 'dark';

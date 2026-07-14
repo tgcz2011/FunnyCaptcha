@@ -13,6 +13,10 @@ import '@funnycaptcha/anti-bot';
 import '@funnycaptcha/click-text';
 import '@funnycaptcha/color-pick';
 import '@funnycaptcha/puzzle';
+import '@funnycaptcha/advanced-math';
+import '@funnycaptcha/olympiad';
+import '@funnycaptcha/equation-balance';
+import '@funnycaptcha/random-hunt';
 import type { CaptchaInstance } from '@funnycaptcha/core';
 
 const instances = new Map<HTMLElement, CaptchaInstance>();

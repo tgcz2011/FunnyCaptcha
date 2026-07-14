@@ -1,7 +1,7 @@
 {
-  "name": "@funnycaptcha/spot-diff",
+  "name": "@funnycaptcha/equation-balance",
   "version": "0.6.0",
-  "description": "Spot-the-difference captcha — FunnyChapter",
+  "description": "Chemical equation balancing captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -22,6 +22,7 @@
   "dependencies": {
     "@funnycaptcha/core": "workspace:*"
   },
+  "license": "GPL-3.0",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

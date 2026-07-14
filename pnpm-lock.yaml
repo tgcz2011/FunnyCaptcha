@@ -116,6 +116,12 @@ importers:
         specifier: ^18.3.1
         version: 18.3.7(@types/react@18.3.31)
 
+  packages/captchas/advanced-math:
+    dependencies:
+      '@funnycaptcha/core':
+        specifier: workspace:*
+        version: link:../../core
+
   packages/captchas/anti-bot:
     dependencies:
       '@funnycaptcha/core':
@@ -146,6 +152,12 @@ importers:
         specifier: workspace:*
         version: link:../../core
 
+  packages/captchas/equation-balance:
+    dependencies:
+      '@funnycaptcha/core':
+        specifier: workspace:*
+        version: link:../../core
+
   packages/captchas/math:
     dependencies:
       '@funnycaptcha/core':
@@ -164,7 +176,19 @@ importers:
         specifier: workspace:*
         version: link:../../core
 
+  packages/captchas/olympiad:
+    dependencies:
+      '@funnycaptcha/core':
+        specifier: workspace:*
+        version: link:../../core
+
   packages/captchas/puzzle:
+    dependencies:
+      '@funnycaptcha/core':
+        specifier: workspace:*
+        version: link:../../core
+
+  packages/captchas/random-hunt:
     dependencies:
       '@funnycaptcha/core':
         specifier: workspace:*
@@ -204,6 +228,9 @@ importers:
 
   packages/embed:
     dependencies:
+      '@funnycaptcha/advanced-math':
+        specifier: workspace:*
+        version: link:../captchas/advanced-math
       '@funnycaptcha/anti-bot':
         specifier: workspace:*
         version: link:../captchas/anti-bot
@@ -222,6 +249,9 @@ importers:
       '@funnycaptcha/emoji-match':
         specifier: workspace:*
         version: link:../captchas/emoji-match
+      '@funnycaptcha/equation-balance':
+        specifier: workspace:*
+        version: link:../captchas/equation-balance
       '@funnycaptcha/math':
         specifier: workspace:*
         version: link:../captchas/math
@@ -231,9 +261,15 @@ importers:
       '@funnycaptcha/mini-game':
         specifier: workspace:*
         version: link:../captchas/mini-game
+      '@funnycaptcha/olympiad':
+        specifier: workspace:*
+        version: link:../captchas/olympiad
       '@funnycaptcha/puzzle':
         specifier: workspace:*
         version: link:../captchas/puzzle
+      '@funnycaptcha/random-hunt':
+        specifier: workspace:*
+        version: link:../captchas/random-hunt
       '@funnycaptcha/rotate':
         specifier: workspace:*
         version: link:../captchas/rotate

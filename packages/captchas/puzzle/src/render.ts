@@ -162,10 +162,6 @@ export function createPuzzleInstance(
     let startProgress = 0;
     let currentProgress = 0;
 
-    const trackRect = track.getBoundingClientRect();
-    const scaleX = trackRect.width / TRACK_W;
-    const scaleY = trackRect.height / TRACK_H;
-
     function applyProgress(p: number) {
       currentProgress = Math.max(0, Math.min(1, p));
       // handle 沿直角转弯轨道移动
@@ -205,25 +201,23 @@ export function createPuzzleInstance(
 
     handle.addEventListener('pointermove', (e) => {
       if (!dragging) return;
-      const dx = e.clientX - startPointer.x;
-      const dy = e.clientY - startPointer.y;
-      // 计算朝向终点的方向投影
-      const currentPt = pointAtProgress(pts, startProgress);
-      const currentScreenX = trackRect.left + currentPt.x * scaleX;
-      const currentScreenY = trackRect.top + currentPt.y * scaleY;
-      // 终点方向（路径上的下一个点）
-      const nextIdx = Math.min(pts.length - 1, Math.round(startProgress * (pts.length - 1)) + 5);
-      const nextPt = pts[nextIdx]!;
-      const nextScreenX = trackRect.left + nextPt.x * scaleX;
-      const nextScreenY = trackRect.top + nextPt.y * scaleY;
-      const dirX = nextScreenX - currentScreenX;
-      const dirY = nextScreenY - currentScreenY;
-      const dirLen = Math.sqrt(dirX * dirX + dirY * dirY) || 1;
-      // 鼠标移动在路径切线方向的投影
-      const projection = (dx * dirX + dy * dirY) / dirLen;
-      const pathLen = totalLen * scaleX; // 转换为屏幕像素
-      const deltaProgress = projection / pathLen;
-      applyProgress(startProgress + deltaProgress);
+      // S 形路径不自交叉，全路径最近点搜索即可稳定跟手
+      // 实时获取 track 坐标（避免页面滚动后坐标过时）
+      const rect = track.getBoundingClientRect();
+      const sx = rect.width / TRACK_W;
+      const sy = rect.height / TRACK_H;
+      const svgX = (e.clientX - rect.left) / sx;
+      const svgY = (e.clientY - rect.top) / sy;
+      let bestLen = 0;
+      let bestDist = Infinity;
+      const steps = 100;
+      for (let i = 0; i <= steps; i++) {
+        const len = (i / steps) * totalLen;
+        const p = fgPath.getPointAtLength(len);
+        const d = (p.x - svgX) * (p.x - svgX) + (p.y - svgY) * (p.y - svgY);
+        if (d < bestDist) { bestDist = d; bestLen = len; }
+      }
+      applyProgress(bestLen / totalLen);
       recorder.record(e.clientX, e.clientY);
     });
 

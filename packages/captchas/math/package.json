@@ -1,18 +1,27 @@
 {
   "name": "@funnycaptcha/math",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Arithmetic captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
-  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": { "@funnycaptcha/core": "workspace:*" },
+  "dependencies": {
+    "@funnycaptcha/core": "workspace:*"
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

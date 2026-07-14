@@ -1,7 +1,8 @@
 {
-  "name": "@funnycaptcha/spot-diff",
+  "name": "@funnycaptcha/olympiad",
   "version": "0.6.0",
-  "description": "Spot-the-difference captcha — FunnyChapter",
+  "description": "Primary-school math olympiad captcha — FunnyChapter",
+  "license": "GPL-3.0",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

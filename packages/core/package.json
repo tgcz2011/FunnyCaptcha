@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/core",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Framework-agnostic captcha engine core",
   "type": "module",
   "main": "./dist/index.js",
@@ -12,7 +12,9 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "test": "vitest run",

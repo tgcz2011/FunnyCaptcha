@@ -1,18 +1,27 @@
 {
   "name": "@funnycaptcha/embed",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Script-tag embeddable FunnyChapter bundle",
   "type": "module",
   "main": "./dist/embed.js",
   "module": "./dist/embed.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/embed.js" },
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/embed.js"
+    },
     "./iife": "./dist/embed.global.js",
     "./package.json": "./package.json"
   },
-  "files": ["dist"],
-  "scripts": { "build": "tsup", "test": "vitest run", "typecheck": "tsc --noEmit" },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@funnycaptcha/core": "workspace:*",
     "@funnycaptcha/math": "workspace:*",
@@ -27,7 +36,11 @@
     "@funnycaptcha/anti-bot": "workspace:*",
     "@funnycaptcha/click-text": "workspace:*",
     "@funnycaptcha/color-pick": "workspace:*",
-    "@funnycaptcha/puzzle": "workspace:*"
+    "@funnycaptcha/puzzle": "workspace:*",
+    "@funnycaptcha/advanced-math": "workspace:*",
+    "@funnycaptcha/olympiad": "workspace:*",
+    "@funnycaptcha/equation-balance": "workspace:*",
+    "@funnycaptcha/random-hunt": "workspace:*"
   },
   "publishConfig": {
     "access": "public",
