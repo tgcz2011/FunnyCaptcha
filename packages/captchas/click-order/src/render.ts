@@ -3,8 +3,8 @@ import { hashProof } from '@funnycaptcha/core';
 import { generateChallenge, proofInput, verifyOrder, type ClickOrderChallenge } from './challenge.js';
 
 const STR = {
-  zh: { title: '按 1 → 2 → 3 → 4 顺序点击', success: '验证成功', fail: '顺序错误，请重试', refresh: '刷新' },
-  en: { title: 'Click in order 1 → 2 → 3 → 4', success: 'Verified', fail: 'Wrong order, try again', refresh: 'Refresh' },
+  zh: { title: '按 1 -> 2 -> 3 -> 4 顺序点击（位置会变）', success: '验证成功', fail: '顺序错误，请重试', refresh: '刷新' },
+  en: { title: 'Click in order 1 -> 2 -> 3 -> 4 (positions shift)', success: 'Verified', fail: 'Wrong order, try again', refresh: 'Refresh' },
 };
 
 // 区域尺寸
@@ -49,17 +49,19 @@ export function createClickOrderInstance(
   let listeners: ((r: CaptchaResult) => void)[] = [];
   let startTime = Date.now();
   let clicked: number[] = [];
+  let doneSet = new Set<number>();
   let finished = false;
 
   function render() {
     current = generateChallenge();
     clicked = [];
+    doneSet = new Set<number>();
     finished = false;
     startTime = Date.now();
     const slots = generateSlots(current.targets.length);
     const boxes = current.targets.map((num, i) => {
       const slot = slots[i]!;
-      return `<div class="fc-click-box" data-num="${num}" style="left:${Math.round(slot.x)}px;top:${Math.round(slot.y)}px;">${num}</div>`;
+      return `<div class="fc-click-box" data-idx="${i}" data-num="${num}" style="left:${Math.round(slot.x)}px;top:${Math.round(slot.y)}px;">${num}</div>`;
     }).join('');
     container.innerHTML = `
       <style>
@@ -69,7 +71,7 @@ export function createClickOrderInstance(
         .fc-click{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;color:var(--fc-text)}
         .fc-click-title{font-size:14px;color:var(--fc-text);margin-bottom:12px;text-align:center}
         .fc-click-area{position:relative;width:${AREA_W}px;height:${AREA_H}px;background:var(--fc-surface);border-radius:8px;border:1px solid var(--fc-border);overflow:hidden}
-        .fc-click-box{position:absolute;width:${BOX_W}px;height:${BOX_H}px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;color:var(--fc-accent);background:var(--fc-bg);border:2px solid var(--fc-accent);border-radius:8px;cursor:pointer;user-select:none;transition:transform .15s,background .15s,color .15s,border-color .15s}
+        .fc-click-box{position:absolute;width:${BOX_W}px;height:${BOX_H}px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;color:var(--fc-accent);background:var(--fc-bg);border:2px solid var(--fc-accent);border-radius:8px;cursor:pointer;user-select:none;transition:left .4s cubic-bezier(.4,0,.2,1),top .4s cubic-bezier(.4,0,.2,1),transform .15s,background .15s,color .15s,border-color .15s}
         .fc-click-box:hover{transform:scale(1.05)}
         .fc-click-box-active{background:var(--fc-accent);color:var(--fc-bg)}
         .fc-click-box-done{background:var(--fc-success);border-color:var(--fc-success);color:#fff;cursor:default}
@@ -93,6 +95,18 @@ export function createClickOrderInstance(
     const refreshBtn = container.querySelector('.fc-click-refresh') as HTMLButtonElement;
     refreshBtn.addEventListener('click', render);
 
+    function relocateBoxes(excludeIndex: number) {
+      const remaining = current.targets.map((_, i) => i).filter(i => i !== excludeIndex && !doneSet.has(i));
+      if (remaining.length === 0) return;
+      const newSlots = generateSlots(remaining.length);
+      remaining.forEach((idx, j) => {
+        const box = area.querySelector(`[data-idx="${idx}"]`) as HTMLElement;
+        const slot = newSlots[j]!;
+        box.style.left = `${Math.round(slot.x)}px`;
+        box.style.top = `${Math.round(slot.y)}px`;
+      });
+    }
+
     area.querySelectorAll('.fc-click-box').forEach(el => {
       el.addEventListener('click', async () => {
         if (finished) return;
@@ -102,7 +116,9 @@ export function createClickOrderInstance(
         const expected = current.order[clicked.length]!;
         if (num === expected) {
           // 点击正确：高亮并锁定
+          const idx = Number(box.dataset.idx);
           clicked.push(num);
+          doneSet.add(idx);
           box.classList.add('fc-click-box-done');
           if (clicked.length === current.order.length) {
             // 全部正确
@@ -115,6 +131,8 @@ export function createClickOrderInstance(
             msg.textContent = t.success;
             config.onVerify?.(result);
             listeners.forEach(cb => cb(result));
+          } else {
+            relocateBoxes(idx);
           }
         } else {
           // 顺序错误：重置

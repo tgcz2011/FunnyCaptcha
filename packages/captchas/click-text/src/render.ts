@@ -3,9 +3,41 @@ import { hashProof } from '@funnycaptcha/core';
 import { generateChallenge, proofInput, verifyOrder, type ClickTextChallenge } from './challenge.js';
 
 const STR = {
-  zh: { title: '请按顺序点击', success: '验证成功', fail: '顺序错误，请重试', refresh: '刷新' },
-  en: { title: 'Click in order', success: 'Verified', fail: 'Wrong order, try again', refresh: 'Refresh' },
+  zh: { title: '请按顺序点击（位置会变）', success: '验证成功', fail: '顺序错误，请重试', refresh: '刷新' },
+  en: { title: 'Click in order (positions shift)', success: 'Verified', fail: 'Wrong order, try again', refresh: 'Refresh' },
 };
+
+// 区域尺寸（与 challenge.ts 保持一致）
+const AREA_W = 320;
+const AREA_H = 200;
+const BOX_W = 44;
+const BOX_H = 44;
+// 重新分布时任意两槽位最小间距
+const MIN_DIST = 80;
+
+// 在 AREA_W×AREA_H 区域内随机生成 count 个不重叠槽位（拒绝采样）
+function generateSlots(count: number): { x: number; y: number }[] {
+  const maxX = AREA_W - BOX_W;
+  const maxY = AREA_H - BOX_H;
+  const slots: { x: number; y: number }[] = [];
+  let attempts = 0;
+  while (slots.length < count && attempts < 1000) {
+    attempts++;
+    const candidate = { x: Math.random() * maxX, y: Math.random() * maxY };
+    let ok = true;
+    for (const s of slots) {
+      const dx = candidate.x - s.x;
+      const dy = candidate.y - s.y;
+      if (Math.sqrt(dx * dx + dy * dy) < MIN_DIST) { ok = false; break; }
+    }
+    if (ok) slots.push(candidate);
+  }
+  // 兜底：若拒绝采样未填满，剩余用伪随机补齐（极少触发）
+  while (slots.length < count) {
+    slots.push({ x: Math.random() * maxX, y: Math.random() * maxY });
+  }
+  return slots;
+}
 
 export function createClickTextInstance(
   container: HTMLElement,
@@ -16,17 +48,19 @@ export function createClickTextInstance(
   let listeners: ((r: CaptchaResult) => void)[] = [];
   let startTime = Date.now();
   let clicked: string[] = [];
+  let doneSet = new Set<number>();
   let finished = false;
 
   function render() {
     current = generateChallenge();
     clicked = [];
+    doneSet = new Set<number>();
     finished = false;
     startTime = Date.now();
     const prompt = current.chars.join('、');
     const chars = current.chars.map((ch, i) => {
       const p = current.positions[i]!;
-      return `<div class="fc-click-text-char" data-ch="${ch}" style="left:${p.x}px;top:${p.y}px;">${ch}</div>`;
+      return `<div class="fc-click-text-char" data-idx="${i}" data-ch="${ch}" style="left:${p.x}px;top:${p.y}px;">${ch}</div>`;
     }).join('');
     container.innerHTML = `
       <style>
@@ -36,7 +70,7 @@ export function createClickTextInstance(
         .fc-click-text-title{font-size:14px;color:var(--fc-text);margin-bottom:4px;text-align:center}
         .fc-click-text-prompt{font-size:15px;color:var(--fc-accent);margin-bottom:12px;text-align:center;font-weight:600}
         .fc-click-text-area{position:relative;width:320px;height:200px;background:var(--fc-surface);border-radius:8px;border:1px solid var(--fc-border);overflow:hidden}
-        .fc-click-text-char{position:absolute;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;color:var(--fc-text);background:var(--fc-bg);border:2px solid var(--fc-border);border-radius:8px;cursor:pointer;user-select:none;transition:transform .15s,background .15s,color .15s,border-color .15s}
+        .fc-click-text-char{position:absolute;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;color:var(--fc-text);background:var(--fc-bg);border:2px solid var(--fc-border);border-radius:8px;cursor:pointer;user-select:none;transition:left .4s cubic-bezier(.4,0,.2,1),top .4s cubic-bezier(.4,0,.2,1),transform .15s,background .15s,color .15s,border-color .15s}
         .fc-click-text-char:hover{transform:scale(1.08);border-color:var(--fc-accent)}
         .fc-click-text-char-done{background:var(--fc-success);border-color:var(--fc-success);color:#fff;cursor:default}
         .fc-click-text-char-done:hover{transform:none}
@@ -54,9 +88,22 @@ export function createClickTextInstance(
         <button class="fc-click-text-refresh">${t.refresh}</button>
       </div>
     `;
+    const area = container.querySelector('.fc-click-text-area') as HTMLDivElement;
     const msg = container.querySelector('.fc-click-text-msg') as HTMLDivElement;
     const refreshBtn = container.querySelector('.fc-click-text-refresh') as HTMLButtonElement;
     refreshBtn.addEventListener('click', () => render());
+
+    function relocateChars(excludeIndex: number) {
+      const remaining = current.chars.map((_, i) => i).filter(i => i !== excludeIndex && !doneSet.has(i));
+      if (remaining.length === 0) return;
+      const newSlots = generateSlots(remaining.length);
+      remaining.forEach((idx, j) => {
+        const box = area.querySelector(`[data-idx="${idx}"]`) as HTMLElement;
+        const slot = newSlots[j]!;
+        box.style.left = `${Math.round(slot.x)}px`;
+        box.style.top = `${Math.round(slot.y)}px`;
+      });
+    }
 
     container.querySelectorAll('.fc-click-text-char').forEach(el => {
       el.addEventListener('click', async () => {
@@ -66,7 +113,9 @@ export function createClickTextInstance(
         const ch = box.dataset.ch!;
         const expected = current.chars[clicked.length]!;
         if (ch === expected) {
+          const idx = Number(box.dataset.idx);
           clicked.push(ch);
+          doneSet.add(idx);
           box.classList.add('fc-click-text-char-done');
           if (clicked.length === current.chars.length) {
             finished = true;
@@ -78,6 +127,8 @@ export function createClickTextInstance(
             msg.textContent = t.success;
             config.onVerify?.(result);
             listeners.forEach(cb => cb(result));
+          } else {
+            relocateChars(idx);
           }
         } else {
           finished = true;

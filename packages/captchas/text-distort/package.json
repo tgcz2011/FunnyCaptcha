@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/text-distort",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Distorted text captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",

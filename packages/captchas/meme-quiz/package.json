@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/meme-quiz",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Meme-quiz captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",

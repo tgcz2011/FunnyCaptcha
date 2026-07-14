@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/mini-game",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Whack-a-mole mini-game captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",
