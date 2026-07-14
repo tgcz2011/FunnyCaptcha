@@ -176,8 +176,7 @@ function openBrowser(url: string): void {
   });
 }
 
-// CLI 主入口
-const port = 3000;
+// CLI 主入口：从 3000 起自动找可用端口
 const server = createServer((req, res) => {
   if (req.url === '/' || req.url === '/index.html') {
     const html = getDemoHTML();
@@ -189,18 +188,30 @@ const server = createServer((req, res) => {
   }
 });
 
-server.listen(port, () => {
-  const url = `http://localhost:${port}`;
-  console.log('');
-  console.log('  ╔══════════════════════════════════════╗');
-  console.log('  ║       FunnyChapter CLI Demo           ║');
-  console.log('  ╚══════════════════════════════════════╝');
-  console.log('');
-  console.log(`  ➜  Demo:    ${url}`);
-  console.log(`  ➜  按 Ctrl+C 退出`);
-  console.log('');
-  openBrowser(url);
-});
+function startOnAvailablePort(startPort: number): void {
+  server.once('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE' && startPort < 3100) {
+      startOnAvailablePort(startPort + 1);
+    } else {
+      console.error(`无法启动服务器: ${err.message}`);
+      process.exit(1);
+    }
+  });
+  server.listen(startPort, () => {
+    const url = `http://localhost:${startPort}`;
+    console.log('');
+    console.log('  ╔══════════════════════════════════════╗');
+    console.log('  ║       FunnyChapter CLI Demo           ║');
+    console.log('  ╚══════════════════════════════════════╝');
+    console.log('');
+    console.log(`  ➜  Demo:    ${url}`);
+    console.log(`  ➜  按 Ctrl+C 退出`);
+    console.log('');
+    openBrowser(url);
+  });
+}
+
+startOnAvailablePort(3000);
 
 // 优雅退出
 process.on('SIGINT', () => {
