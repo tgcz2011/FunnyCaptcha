@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/advanced-math",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "Calculus captcha (derivatives, integrals, limits) — FunnyChapter",
   "license": "GPL-3.0",
   "type": "module",

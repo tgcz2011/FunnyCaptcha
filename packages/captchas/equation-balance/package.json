@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/equation-balance",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "Chemical equation balancing captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",

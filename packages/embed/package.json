@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/embed",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "Script-tag embeddable FunnyChapter bundle",
   "type": "module",
   "main": "./dist/embed.js",

@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/color-pick",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "Color-pick captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",

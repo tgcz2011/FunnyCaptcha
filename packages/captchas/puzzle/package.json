@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/puzzle",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "Puzzle captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",

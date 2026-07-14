@@ -10,6 +10,7 @@ const STR = {
     fail: '答错了，换一题',
     refresh: '刷新',
     hint: '提示：x²可写为x^2，可省略*',
+    success: '验证通过',
   },
   en: {
     title: 'Calculus',
@@ -18,6 +19,7 @@ const STR = {
     fail: 'Wrong, try again',
     refresh: 'Refresh',
     hint: 'Tip: x² = x^2, * optional',
+    success: 'Verified',
   },
 };
 
@@ -75,6 +77,10 @@ export function createAdvancedMathInstance(
         render();
         return;
       }
+      msg.style.color = 'var(--fc-success)';
+      msg.textContent = t.success;
+      btn.disabled = true;
+      input.disabled = true;
       const result: CaptchaResult = {
         success: true,
         proof: await hashProof(`${current.question}=${current.answer}`),

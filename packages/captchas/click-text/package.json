@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/click-text",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "Click-text captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",

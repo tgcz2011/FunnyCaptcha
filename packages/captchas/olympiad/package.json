@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/olympiad",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "Primary-school math olympiad captcha — FunnyChapter",
   "license": "GPL-3.0",
   "type": "module",

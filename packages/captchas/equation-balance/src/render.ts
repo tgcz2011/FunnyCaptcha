@@ -3,8 +3,8 @@ import { hashProof } from '@funnycaptcha/core';
 import { generateChallenge, verifyAnswer, type EquationBalanceChallenge } from './challenge.js';
 
 const STR = {
-  zh: { title: '配平化学方程式', submit: '验证', fail: '系数不对，再试试', refresh: '换一题', hint: '系数为1也要填' },
-  en: { title: 'Balance the equation', submit: 'Verify', fail: 'Wrong coefficients', refresh: 'Next', hint: 'Enter 1 if needed' },
+  zh: { title: '配平化学方程式', submit: '验证', fail: '系数不对，再试试', refresh: '换一题', hint: '系数为1也要填', success: '配平成功！' },
+  en: { title: 'Balance the equation', submit: 'Verify', fail: 'Wrong coefficients', refresh: 'Next', hint: 'Enter 1 if needed', success: 'Balanced!' },
 };
 
 export function createEquationBalanceInstance(
@@ -77,7 +77,10 @@ export function createEquationBalanceInstance(
         proof: await hashProof(`equation-balance:${current.reactants.join('+')}>${current.products.join('+')}:${current.coefficients.join(',')}`),
         duration: Date.now() - startTime,
       };
-      msg.textContent = '';
+      msg.style.color = 'var(--fc-success)';
+      msg.textContent = t.success;
+      btn.disabled = true;
+      inputs.forEach(i => i.disabled = true);
       config.onVerify?.(result);
       listeners.forEach(cb => cb(result));
     });

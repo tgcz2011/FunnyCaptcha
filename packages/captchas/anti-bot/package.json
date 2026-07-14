@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/anti-bot",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "Satirical anti-bot captcha with a global backdoor — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",

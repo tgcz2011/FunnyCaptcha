@@ -9,6 +9,7 @@ const STR = {
     submit: '验证',
     fail: '答错了，换一题',
     refresh: '刷新',
+    success: '答对了！',
   },
   en: {
     title: 'Math Olympiad',
@@ -16,6 +17,7 @@ const STR = {
     submit: 'Verify',
     fail: 'Wrong, try again',
     refresh: 'Refresh',
+    success: 'Correct!',
   },
 };
 
@@ -71,6 +73,10 @@ export function createOlympiadInstance(
         render();
         return;
       }
+      msg.style.color = 'var(--fc-success)';
+      msg.textContent = t.success;
+      btn.disabled = true;
+      input.disabled = true;
       const result: CaptchaResult = {
         success: true,
         proof: await hashProof(`${current.question}=${current.answer}`),

@@ -13,71 +13,35 @@ const STAGE_H = 200;
 const PIECE_W = 50;
 const MAX_OFFSET = STAGE_W - PIECE_W; // 拼图块可水平移动的最大距离
 
-// 直角转弯轨道尺寸（S 形折返路径）
+// 波浪形轨道尺寸（x 单调递增，不跨行）
 const TRACK_W = 300;
 const TRACK_H = 100;
 const HANDLE_W = 40;
 const HANDLE_H = 40;
 
-// S 形直角转弯路径点（3 段：右 -> 下 -> 左 -> 下 -> 右）
-// 这是一个"回"字形折返路径，从左上角出发，到右下角终点
-function zigzagPoints(): { x: number; y: number }[] {
-  const pts: { x: number; y: number }[] = [];
+// 正弦波浪路径点（从左到右，x 单调递增，y 上下波动）
+function wavePath(): string {
   const margin = HANDLE_W / 2;
   const w = TRACK_W - margin * 2;
-  const h = TRACK_H - margin * 2;
-  // 段 1: 从左到右 (y = margin)
-  const seg1Steps = 30;
-  for (let i = 0; i <= seg1Steps; i++) {
-    pts.push({ x: margin + (w / seg1Steps) * i, y: margin });
+  const cy = TRACK_H / 2;
+  const amp = (TRACK_H / 2) - margin - 4; // 波幅
+  const steps = 80;
+  let d = '';
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const x = margin + w * t;
+    const y = cy + amp * Math.sin(t * Math.PI * 3); // 3 个波峰
+    d += `${i === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)} `;
   }
-  // 段 2: 从右到下 (x = TRACK_W - margin, y 增长到中间)
-  const seg2Steps = 10;
-  const midY = margin + h / 4;
-  for (let i = 1; i <= seg2Steps; i++) {
-    pts.push({ x: TRACK_W - margin, y: margin + (midY - margin) / seg2Steps * i });
-  }
-  // 段 3: 从右到左 (y = midY)
-  for (let i = 1; i <= seg1Steps; i++) {
-    pts.push({ x: TRACK_W - margin - (w / seg1Steps) * i, y: midY });
-  }
-  // 段 4: 从左到下 (x = margin, y 增长到 3/4)
-  const midY2 = margin + (h * 3) / 4;
-  for (let i = 1; i <= seg2Steps; i++) {
-    pts.push({ x: margin, y: midY + (midY2 - midY) / seg2Steps * i });
-  }
-  // 段 5: 从左到右 (y = midY2)
-  for (let i = 1; i <= seg1Steps; i++) {
-    pts.push({ x: margin + (w / seg1Steps) * i, y: midY2 });
-  }
-  // 段 6: 从右到下终点 (x = TRACK_W - margin, y 到底)
-  for (let i = 1; i <= seg2Steps; i++) {
-    pts.push({ x: TRACK_W - margin, y: midY2 + (TRACK_H - margin - midY2) / seg2Steps * i });
-  }
-  return pts;
+  return d.trim();
 }
 
-function zigzagPath(pts: { x: number; y: number }[]): string {
-  return pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ');
-}
-
-function pointAtProgress(pts: { x: number; y: number }[], progress: number): { x: number; y: number } {
-  const idx = Math.min(pts.length - 1, Math.max(0, Math.round(progress * (pts.length - 1))));
-  return pts[idx]!;
-}
-
-// piece 的运动轨迹：圆形（与 handle 进度反向）
-// progress 0 -> 1 时，piece 沿圆周从 0° 转到 -360°（逆时针）
-function pieceCirclePos(progress: number): { x: number; y: number } {
-  const cx = STAGE_W / 2;
-  const cy = STAGE_H / 2;
-  const radius = Math.min(STAGE_W, STAGE_H) / 2 - PIECE_W / 2 - 8;
-  // piece 反向运动：进度增加时角度减小
-  const angle = -progress * Math.PI * 2;
-  return {
-    x: cx + radius * Math.cos(angle) - PIECE_W / 2,
-    y: cy + radius * Math.sin(angle) - PIECE_W / 2,
-  };
+// piece 的运动轨迹：从左到右水平移动（y 固定在 stage 中间）
+function piecePos(progress: number): { x: number; y: number } {
+  const maxX = STAGE_W - PIECE_W;
+  const x = maxX * progress;
+  const y = (STAGE_H - PIECE_W) / 2;
+  return { x, y };
 }
 
 export function createPuzzleInstance(
@@ -100,8 +64,7 @@ export function createPuzzleInstance(
     locked = false;
     recorder.clear();
     const gapLeft = (current.gapPosition / 100) * MAX_OFFSET;
-    const pts = zigzagPoints();
-    const pathD = zigzagPath(pts);
+    const pathD = wavePath();
     container.innerHTML = `
       <style>
         .fc-puzzle{font-family:-apple-system,system-ui,sans-serif;max-width:360px;width:100%;padding:16px;box-sizing:border-box}
@@ -164,21 +127,19 @@ export function createPuzzleInstance(
 
     function applyProgress(p: number) {
       currentProgress = Math.max(0, Math.min(1, p));
-      // handle 沿直角转弯轨道移动
-      const pt = pointAtProgress(pts, currentProgress);
-      handle.style.left = `${(pt.x / TRACK_W) * 100}%`;
-      handle.style.top = `${(pt.y / TRACK_H) * 100}%`;
       fgPath.style.strokeDashoffset = `${totalLen * (1 - currentProgress)}`;
       // piece 沿圆形路径运动（与进度反向）
-      const piecePos = pieceCirclePos(currentProgress);
-      piece.style.left = `${piecePos.x}px`;
-      piece.style.top = `${piecePos.y}px`;
+      const pp = piecePos(currentProgress);
+      piece.style.left = `${pp.x}px`;
+      piece.style.top = `${pp.y}px`;
     }
 
     function bounceBack() {
       handle.style.transition = 'left .35s ease, top .35s ease, border-color .15s';
       piece.style.transition = 'left .35s ease, top .35s ease, background .15s, border-color .15s';
       fgPath.style.transition = 'stroke-dashoffset .35s ease, stroke .15s';
+      handle.style.left = `${(HANDLE_W / 2 / TRACK_W) * 100}%`;
+      handle.style.top = '50%';
       applyProgress(0);
       setTimeout(() => {
         handle.style.transition = 'border-color .15s';
@@ -188,6 +149,8 @@ export function createPuzzleInstance(
     }
 
     applyProgress(0);
+    handle.style.left = `${(HANDLE_W / 2 / TRACK_W) * 100}%`;
+    handle.style.top = '50%';
 
     handle.addEventListener('pointerdown', (e) => {
       if (done || locked) return;
@@ -201,23 +164,16 @@ export function createPuzzleInstance(
 
     handle.addEventListener('pointermove', (e) => {
       if (!dragging) return;
-      // S 形路径不自交叉，全路径最近点搜索即可稳定跟手
-      // 实时获取 track 坐标（避免页面滚动后坐标过时）
+      // handle 直接跟鼠标（真正跟手），进度按 x 位置计算（波浪路径 x 单调递增，不跨行）
       const rect = track.getBoundingClientRect();
-      const sx = rect.width / TRACK_W;
-      const sy = rect.height / TRACK_H;
-      const svgX = (e.clientX - rect.left) / sx;
-      const svgY = (e.clientY - rect.top) / sy;
-      let bestLen = 0;
-      let bestDist = Infinity;
-      const steps = 100;
-      for (let i = 0; i <= steps; i++) {
-        const len = (i / steps) * totalLen;
-        const p = fgPath.getPointAtLength(len);
-        const d = (p.x - svgX) * (p.x - svgX) + (p.y - svgY) * (p.y - svgY);
-        if (d < bestDist) { bestDist = d; bestLen = len; }
-      }
-      applyProgress(bestLen / totalLen);
+      const svgX = (e.clientX - rect.left) / (rect.width / TRACK_W);
+      const svgY = (e.clientY - rect.top) / (rect.height / TRACK_H);
+      const clampedX = Math.max(0, Math.min(TRACK_W, svgX));
+      const clampedY = Math.max(0, Math.min(TRACK_H, svgY));
+      handle.style.left = `${(clampedX / TRACK_W) * 100}%`;
+      handle.style.top = `${(clampedY / TRACK_H) * 100}%`;
+      // 进度 = x 位置百分比
+      applyProgress(clampedX / TRACK_W);
       recorder.record(e.clientX, e.clientY);
     });
 
@@ -229,8 +185,8 @@ export function createPuzzleInstance(
       // piece 当前的水平百分比位置（用于校验是否对齐缺口）
       // piece 走圆形，其对齐缺口的位置是圆形上 x 最接近 gapLeft 的点
       // 简化：当 progress 对应的 piece x 位置在缺口容差内即通过
-      const piecePos = pieceCirclePos(currentProgress);
-      const pieceLeftPct = (piecePos.x / STAGE_W) * 100;
+      const pp = piecePos(currentProgress);
+      const pieceLeftPct = (pp.x / STAGE_W) * 100;
       if (!verifyPosition(current, pieceLeftPct)) {
         bounceBack();
         msg.style.color = 'var(--fc-danger)';

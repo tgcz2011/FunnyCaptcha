@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/rotate",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "description": "Rotate captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",

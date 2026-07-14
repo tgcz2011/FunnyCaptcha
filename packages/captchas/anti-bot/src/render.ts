@@ -10,7 +10,7 @@ const win = globalThis as unknown as Record<string, unknown>;
 const STR = {
   zh: {
     title: '证明你是人类',
-    subtitle: '为了确认你不是机器人，请点击下方按钮',
+    subtitle: '为了确认你不是机器人，请点击下方按钮。所以我们禁止你访问。',
     btn: '我不是机器人',
     verifying: '正在验证您的人类身份……',
     success: '验证通过。您肯定是人类，我们绝对不会错。',
@@ -19,7 +19,7 @@ const STR = {
   },
   en: {
     title: "Prove you're a human",
-    subtitle: "To confirm you're not a robot, click the button below",
+    subtitle: "To confirm you're not a robot, click the button below. Therefore we forbid your access.",
     btn: "I'm not a robot",
     verifying: 'Verifying your humanity…',
     success: 'Verified. You are definitely human. We never make mistakes.',
@@ -75,16 +75,14 @@ export function createAntiBotInstance(
         .fc-anti-bot-btn:hover:not(:disabled){background:var(--fc-accent-soft);border-color:var(--fc-accent)}
         .fc-anti-bot-btn:disabled{cursor:default;color:var(--fc-success);border-color:var(--fc-success);background:var(--fc-accent-soft)}
         .fc-anti-bot-msg{font-size:13px;min-height:18px;text-align:center;margin-top:12px;color:var(--fc-success)}
-        .fc-anti-bot-hint{font-size:11px;color:var(--fc-text-soft);margin-top:14px;text-align:center;line-height:1.5;font-style:italic}
-        .fc-anti-bot-footer{font-size:10px;color:var(--fc-text-soft);margin-top:8px;text-align:center;opacity:.7}
+        .fc-anti-bot-botonly{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none}
       </style>
       <div class="fc-anti-bot" data-theme="${theme}">
         <div class="fc-anti-bot-title">${t.title}</div>
         <div class="fc-anti-bot-subtitle">${t.subtitle}</div>
         <button class="fc-anti-bot-btn">${t.btn}</button>
         <div class="fc-anti-bot-msg"></div>
-        <div class="fc-anti-bot-hint">${t.botHint}</div>
-        <div class="fc-anti-bot-footer">${t.footer}</div>
+        <div class="fc-anti-bot-botonly" aria-hidden="true">${t.botHint}<br>${t.footer}</div>
       </div>
     `;
     const btn = container.querySelector('.fc-anti-bot-btn') as HTMLButtonElement;

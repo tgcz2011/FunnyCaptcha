@@ -3,8 +3,8 @@ import { generateChallenge, verifyAnswer, type MathChallenge } from './challenge
 import { hashProof } from '@funnycaptcha/core';
 
 const STR = {
-  zh: { title: '请计算', placeholder: '输入答案', submit: '验证', fail: '答错了，换一题', refresh: '刷新' },
-  en: { title: 'Solve', placeholder: 'Enter answer', submit: 'Verify', fail: 'Wrong, try again', refresh: 'Refresh' },
+  zh: { title: '请计算', placeholder: '输入答案', submit: '验证', fail: '答错了，换一题', refresh: '刷新', success: '答对了！' },
+  en: { title: 'Solve', placeholder: 'Enter answer', submit: 'Verify', fail: 'Wrong, try again', refresh: 'Refresh', success: 'Correct!' },
 };
 
 export function createMathInstance(
@@ -59,6 +59,10 @@ export function createMathInstance(
         render();
         return;
       }
+      msg.style.color = 'var(--fc-success)';
+      msg.textContent = t.success;
+      btn.disabled = true;
+      input.disabled = true;
       const result: CaptchaResult = {
         success: true,
         proof: await hashProof(`${current.question}=${current.answer}`),

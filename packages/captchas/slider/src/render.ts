@@ -172,26 +172,24 @@ export function createSliderInstance(
 
     handle.addEventListener('pointermove', (e) => {
       if (!dragging) return;
-      // 极坐标距离映射：鼠标到中心的距离 r → 螺旋进度
-      // 阿基米德螺旋 r = SPIRAL_B * theta，theta 从 theta_max(外) 到 0(中心)
-      // progress = 1 - theta/theta_max = 1 - r/r_max
-      // 鼠标越接近中心 → r 越小 → progress 越接近 1（终点）
-      // 鼠标越远离中心 → r 越大 → progress 越接近 0（起点）
-      // 实时获取 stage 坐标（避免页面滚动后 stageRect 过时）
+      // handle 直接跟鼠标（真正跟手），限制在 stage 内
       const rect = stage.getBoundingClientRect();
       const sx = rect.width / CANVAS_W;
       const sy = rect.height / CANVAS_H;
-      const svgX = (e.clientX - rect.left) / sx;
-      const svgY = (e.clientY - rect.top) / sy;
+      let svgX = (e.clientX - rect.left) / sx;
+      let svgY = (e.clientY - rect.top) / sy;
+      svgX = Math.max(0, Math.min(CANVAS_W, svgX));
+      svgY = Math.max(0, Math.min(CANVAS_H, svgY));
+      handle.style.left = `${(svgX / CANVAS_W) * 100}%`;
+      handle.style.top = `${(svgY / CANVAS_H) * 100}%`;
+      // 进度按鼠标到中心距离计算（螺旋只是视觉引导）
       const dx = svgX - CX;
       const dy = svgY - CY;
       const r = Math.sqrt(dx * dx + dy * dy);
-      const progress = 1 - r / SPIRAL_R_MAX;
-      // 平滑推进：限制单步变化幅度，避免抖动跨越圈
-      const step = progress - currentProgress;
-      const maxStep = 0.08; // 单次最多推进 8%
-      const clampedStep = Math.max(-maxStep, Math.min(maxStep, step));
-      applyProgress(currentProgress + clampedStep);
+      const progress = Math.max(0, Math.min(1, 1 - r / SPIRAL_R_MAX));
+      currentProgress = progress;
+      fgPath.style.strokeDashoffset = `${totalLen * (1 - progress)}`;
+      tip.style.opacity = progress > 0.02 ? '0' : '1';
       recorder.record(e.clientX, e.clientY);
     });
 
