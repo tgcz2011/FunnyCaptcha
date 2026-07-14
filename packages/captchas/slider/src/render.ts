@@ -3,27 +3,51 @@ import { hashProof, TrackRecorder, analyzeTrack } from '@funnycaptcha/core';
 import { generateChallenge, proofInput, type SliderChallenge } from './challenge.js';
 
 const STR = {
-  zh: { title: '沿曲线拖动滑块到终点', tip: '向右拖动', success: '验证成功', fail: '请拖到尽头', botFail: '检测到异常操作', refresh: '刷新' },
-  en: { title: 'Drag along the curve to the end', tip: 'Drag right', success: 'Verified', fail: 'Drag to the end', botFail: 'Bot-like behavior', refresh: 'Refresh' },
+  zh: { title: '沿螺旋拖动滑块到终点', tip: '沿螺旋路径拖动', success: '验证成功', fail: '请拖到尽头', botFail: '检测到异常操作', refresh: '刷新' },
+  en: { title: 'Drag along the spiral to the center', tip: 'Follow the spiral', success: 'Verified', fail: 'Drag to the end', botFail: 'Bot-like behavior', refresh: 'Refresh' },
 };
 
-const TRACK_H = 60;
-const HANDLE_W = 50;
-const HANDLE_H = 50;
-const AMP = 14;
-const BASE_Y = TRACK_H / 2 - HANDLE_H / 2;
+// 螺旋轨道画布尺寸
+const CANVAS_W = 320;
+const CANVAS_H = 200;
+const HANDLE_W = 36;
+const HANDLE_H = 36;
 
-// 生成正弦曲线路径
-function sinePath(width: number, height: number, amp: number): string {
-  const steps = 40;
-  const baseY = height / 2;
-  let d = '';
+// 螺旋参数：阿基米德螺旋 r = a + b*θ
+// 从外向内，θ 从 0 到 6π（3 圈）
+const SPIRAL_THETA_MAX = 6 * Math.PI;
+const SPIRAL_A = 8;   // 起始半径
+const SPIRAL_B = 8;   // 每圈半径增量
+
+// 中心点
+const CX = CANVAS_W / 2;
+const CY = CANVAS_H / 2;
+
+// 预生成螺旋路径点（从外向内，用户从外端开始拖到中心）
+function spiralPoints(): { x: number; y: number; theta: number }[] {
+  const steps = 200;
+  const pts: { x: number; y: number; theta: number }[] = [];
   for (let i = 0; i <= steps; i++) {
-    const x = (i / steps) * width;
-    const y = baseY + amp * Math.sin((i / steps) * Math.PI * 2);
-    d += i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
+    // t: 0 -> 1, theta: SPIRAL_THETA_MAX -> 0（外到内）
+    const t = i / steps;
+    const theta = SPIRAL_THETA_MAX * (1 - t);
+    const r = SPIRAL_A + SPIRAL_B * theta;
+    const x = CX + r * Math.cos(theta);
+    const y = CY + r * Math.sin(theta);
+    pts.push({ x, y, theta });
   }
-  return d;
+  return pts;
+}
+
+// 生成 SVG path
+function spiralPath(pts: { x: number; y: number }[]): string {
+  return pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ');
+}
+
+// 根据进度 (0-1) 获取螺旋上的点
+function pointAtProgress(pts: { x: number; y: number }[], progress: number): { x: number; y: number } {
+  const idx = Math.min(pts.length - 1, Math.max(0, Math.round(progress * (pts.length - 1))));
+  return pts[idx]!;
 }
 
 export function createSliderInstance(
@@ -45,6 +69,8 @@ export function createSliderInstance(
     done = false;
     locked = false;
     recorder.clear();
+    const pts = spiralPoints();
+    const pathD = spiralPath(pts);
     container.innerHTML = `
       <style>
         .fc-slider{font-family:-apple-system,system-ui,sans-serif;max-width:360px;width:100%;padding:16px;box-sizing:border-box}
@@ -52,28 +78,30 @@ export function createSliderInstance(
         .fc-slider[data-theme="dark"]{--fc-bg:#1e2544;--fc-surface:#171c36;--fc-text:#e5e9f0;--fc-text-soft:#94a3b8;--fc-border:#2a3358;--fc-accent:#818cf8;--fc-accent-soft:#252b5c;--fc-success:#4ade80;--fc-danger:#f87171}
         .fc-slider{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;color:var(--fc-text)}
         .fc-slider-title{font-size:14px;color:var(--fc-text);margin-bottom:12px;text-align:center}
-        .fc-slider-track{position:relative;height:${TRACK_H}px;background:var(--fc-surface);border:1px solid var(--fc-border);border-radius:20px}
-        .fc-slider-curve{position:absolute;left:0;top:0;width:100%;height:${TRACK_H}px;pointer-events:none}
-        .fc-slider-curve-bg{fill:none;stroke:var(--fc-border);stroke-width:4;stroke-linecap:round}
-        .fc-slider-curve-fg{fill:none;stroke:var(--fc-accent);stroke-width:4;stroke-linecap:round;transition:stroke .15s}
-        .fc-slider-handle{position:absolute;left:0;top:${BASE_Y}px;width:${HANDLE_W}px;height:${HANDLE_H}px;background:var(--fc-bg);border:2px solid var(--fc-accent);border-radius:50%;cursor:grab;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.15);user-select:none;touch-action:none;transition:border-color .15s,color .15s}
+        .fc-slider-stage{position:relative;width:${CANVAS_W}px;height:${CANVAS_H}px;margin:0 auto;background:var(--fc-surface);border:1px solid var(--fc-border);border-radius:10px;overflow:hidden}
+        .fc-slider-svg{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+        .fc-slider-path-bg{fill:none;stroke:var(--fc-border);stroke-width:3;stroke-linecap:round}
+        .fc-slider-path-fg{fill:none;stroke:var(--fc-accent);stroke-width:4;stroke-linecap:round;transition:stroke .15s}
+        .fc-slider-target{fill:none;stroke:var(--fc-success);stroke-width:2;stroke-dasharray:4 3;opacity:.7}
+        .fc-slider-handle{position:absolute;width:${HANDLE_W}px;height:${HANDLE_H}px;background:var(--fc-bg);border:2px solid var(--fc-accent);border-radius:50%;cursor:grab;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.2);user-select:none;touch-action:none;transition:border-color .15s;transform:translate(-50%,-50%);z-index:2}
         .fc-slider-handle:active{cursor:grabbing}
-        .fc-slider-handle::after{content:'\\2192';color:var(--fc-accent);font-size:18px;font-weight:bold;transition:color .15s}
-        .fc-slider-tip{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:13px;color:var(--fc-text-soft);pointer-events:none;transition:opacity .2s}
+        .fc-slider-handle::after{content:'';width:10px;height:10px;background:var(--fc-accent);border-radius:50%;transition:background .15s}
+        .fc-slider-tip{position:absolute;left:50%;top:8px;transform:translateX(-50%);font-size:12px;color:var(--fc-text-soft);pointer-events:none;transition:opacity .2s;background:var(--fc-bg);padding:2px 8px;border-radius:4px}
         .fc-slider-msg{font-size:13px;min-height:18px;text-align:center;margin-top:10px;color:var(--fc-success)}
         .fc-slider-row{display:flex;justify-content:center;margin-top:10px}
         .fc-slider-refresh{padding:4px 12px;font-size:12px;border:1px solid var(--fc-border);background:var(--fc-surface);color:var(--fc-text-soft);border-radius:6px;cursor:pointer}
         .fc-slider-refresh:hover{border-color:var(--fc-accent);color:var(--fc-accent)}
         .fc-slider-done .fc-slider-handle{border-color:var(--fc-success)}
-        .fc-slider-done .fc-slider-handle::after{color:var(--fc-success)}
-        .fc-slider-done .fc-slider-curve-fg{stroke:var(--fc-success)}
+        .fc-slider-done .fc-slider-handle::after{background:var(--fc-success)}
+        .fc-slider-done .fc-slider-path-fg{stroke:var(--fc-success)}
       </style>
       <div class="fc-slider" data-theme="${theme}">
         <div class="fc-slider-title">${t.title}</div>
-        <div class="fc-slider-track">
-          <svg class="fc-slider-curve" width="100%" height="${TRACK_H}" preserveAspectRatio="none">
-            <path class="fc-slider-curve-bg"></path>
-            <path class="fc-slider-curve-fg"></path>
+        <div class="fc-slider-stage">
+          <svg class="fc-slider-svg" viewBox="0 0 ${CANVAS_W} ${CANVAS_H}">
+            <path class="fc-slider-path-bg" d="${pathD}"></path>
+            <path class="fc-slider-path-fg" d="${pathD}"></path>
+            <circle class="fc-slider-target" cx="${CX}" cy="${CY}" r="14"></circle>
           </svg>
           <div class="fc-slider-handle" role="slider" tabindex="0"></div>
           <span class="fc-slider-tip">${t.tip}</span>
@@ -85,63 +113,58 @@ export function createSliderInstance(
       </div>
     `;
     const root = container.querySelector('.fc-slider') as HTMLDivElement;
-    const track = container.querySelector('.fc-slider-track') as HTMLDivElement;
+    const stage = container.querySelector('.fc-slider-stage') as HTMLDivElement;
     const handle = container.querySelector('.fc-slider-handle') as HTMLDivElement;
     const tip = container.querySelector('.fc-slider-tip') as HTMLSpanElement;
     const msg = container.querySelector('.fc-slider-msg') as HTMLDivElement;
     const refreshBtn = container.querySelector('.fc-slider-refresh') as HTMLButtonElement;
-    const bgPath = container.querySelector('.fc-slider-curve-bg') as SVGPathElement;
-    const fgPath = container.querySelector('.fc-slider-curve-fg') as SVGPathElement;
+    const fgPath = container.querySelector('.fc-slider-path-fg') as SVGPathElement;
     refreshBtn.addEventListener('click', render);
 
-    // 绘制正弦曲线
-    const width = track.clientWidth;
-    const d = sinePath(width, TRACK_H, AMP);
-    bgPath.setAttribute('d', d);
-    fgPath.setAttribute('d', d);
+    // 计算路径总长度，用于进度
     const totalLen = fgPath.getTotalLength();
     fgPath.style.strokeDasharray = `${totalLen}`;
     fgPath.style.strokeDashoffset = `${totalLen}`;
 
     let dragging = false;
-    let startX = 0;
-    let startOffset = 0;
-    let currentOffset = 0;
+    let startPointer = { x: 0, y: 0 };
+    let startProgress = 0;
+    let currentProgress = 0; // 0 = 外端, 1 = 中心
 
-    function maxX(): number {
-      return Math.max(1, track.clientWidth - handle.offsetWidth);
-    }
+    // stage 的实际像素尺寸（用于把 SVG 坐标转换为屏幕坐标）
+    const stageRect = stage.getBoundingClientRect();
+    const scaleX = stageRect.width / CANVAS_W;
+    const scaleY = stageRect.height / CANVAS_H;
 
-    function curveTop(left: number): number {
-      return BASE_Y + AMP * Math.sin((left / maxX()) * Math.PI * 2);
-    }
-
-    function applyPos(px: number) {
-      handle.style.left = `${px}px`;
-      handle.style.top = `${curveTop(px)}px`;
-      const frac = px / maxX();
-      fgPath.style.strokeDashoffset = `${totalLen * (1 - frac)}`;
-      tip.style.opacity = px > 8 ? '0' : '1';
+    function applyProgress(p: number) {
+      currentProgress = Math.max(0, Math.min(1, p));
+      const pt = pointAtProgress(pts, currentProgress);
+      // handle 用百分比定位，适配 stage 实际尺寸
+      handle.style.left = `${(pt.x / CANVAS_W) * 100}%`;
+      handle.style.top = `${(pt.y / CANVAS_H) * 100}%`;
+      fgPath.style.strokeDashoffset = `${totalLen * (1 - currentProgress)}`;
+      tip.style.opacity = currentProgress > 0.02 ? '0' : '1';
     }
 
     function bounceBack() {
-      currentOffset = 0;
-      handle.style.transition = 'left .3s, top .3s, border-color .15s, color .15s';
-      fgPath.style.transition = 'stroke-dashoffset .3s, stroke .15s';
-      applyPos(0);
+      handle.style.transition = 'left .35s ease, top .35s ease, border-color .15s';
+      fgPath.style.transition = 'stroke-dashoffset .35s ease, stroke .15s';
+      applyProgress(0);
       setTimeout(() => {
-        handle.style.transition = '';
+        handle.style.transition = 'border-color .15s';
         fgPath.style.transition = 'stroke .15s';
-      }, 320);
+      }, 360);
     }
 
-    applyPos(0);
+    applyProgress(0);
 
+    // 核心：把鼠标水平/垂直位移映射到螺旋进度
+    // 由于螺旋是 2D 的，我们用鼠标移动的距离（向中心方向的投影）来推进进度
     handle.addEventListener('pointerdown', (e) => {
       if (done || locked) return;
       dragging = true;
-      startX = e.clientX;
-      startOffset = currentOffset;
+      startPointer = { x: e.clientX, y: e.clientY };
+      startProgress = currentProgress;
       recorder.start();
       try { handle.setPointerCapture(e.pointerId); } catch { /* ignore */ }
       e.preventDefault();
@@ -149,11 +172,30 @@ export function createSliderInstance(
 
     handle.addEventListener('pointermove', (e) => {
       if (!dragging) return;
-      let px = startOffset + (e.clientX - startX);
-      px = Math.max(0, Math.min(maxX(), px));
-      currentOffset = px;
+      // 计算鼠标移动向量
+      const dx = e.clientX - startPointer.x;
+      const dy = e.clientY - startPointer.y;
+      // 移动距离（像素），取水平+垂直的综合距离
+      // 用户需要向中心方向拖动，我们用总移动量 / 螺旋总长度 来估算进度
+      // 螺旋总长度 ≈ stage 对角线 * 3 圈
+      const spiralLen = stageRect.width * 2.5; // 估算值
+      const moved = Math.sqrt(dx * dx + dy * dy);
+      // 方向：向左/上拖动 = 向中心（外端在右下，中心在中间）
+      // 但螺旋路径方向复杂，我们简化：鼠标移动距离越大概率进度越大
+      // 为了让方向有约束，只取朝向中心的分量
+      const currentPt = pointAtProgress(pts, startProgress);
+      const currentScreenX = stageRect.left + currentPt.x * scaleX;
+      const currentScreenY = stageRect.top + currentPt.y * scaleY;
+      // 朝向中心的向量
+      const toCenterX = stageRect.left + CX * scaleX - currentScreenX;
+      const toCenterY = stageRect.top + CY * scaleY - currentScreenY;
+      const toCenterLen = Math.sqrt(toCenterX * toCenterX + toCenterY * toCenterY) || 1;
+      // 鼠标移动在朝向中心方向的投影
+      const projection = (dx * toCenterX + dy * toCenterY) / toCenterLen;
+      const deltaProgress = projection / spiralLen;
+      const newProgress = startProgress + deltaProgress;
+      applyProgress(newProgress);
       recorder.record(e.clientX, e.clientY);
-      applyPos(px);
     });
 
     const finish = async () => {
@@ -161,8 +203,8 @@ export function createSliderInstance(
       dragging = false;
       const trackPoints = recorder.stop();
 
-      // a. 位置判定（松手后）
-      if (currentOffset / maxX() < 0.92) {
+      // a. 位置判定：进度 >= 0.92 算到达中心
+      if (currentProgress < 0.92) {
         bounceBack();
         msg.style.color = 'var(--fc-danger)';
         msg.textContent = t.fail;
@@ -186,7 +228,7 @@ export function createSliderInstance(
 
       // e. 通过
       done = true;
-      applyPos(maxX());
+      applyProgress(1);
       root.classList.add('fc-slider-done');
       const result: CaptchaResult = {
         success: true,

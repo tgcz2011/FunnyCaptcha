@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/cli",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "FunnyChapter CLI — 在终端输入 funnycaptcha 即可打开 demo",
   "type": "module",
   "bin": {

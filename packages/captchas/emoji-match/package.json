@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/emoji-match",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Emoji-match captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",
