@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Framework-agnostic captcha engine core",
   "type": "module",
   "main": "./dist/index.js",

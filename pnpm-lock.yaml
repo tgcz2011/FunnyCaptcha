@@ -128,6 +128,18 @@ importers:
         specifier: workspace:*
         version: link:../../core
 
+  packages/captchas/click-text:
+    dependencies:
+      '@funnycaptcha/core':
+        specifier: workspace:*
+        version: link:../../core
+
+  packages/captchas/color-pick:
+    dependencies:
+      '@funnycaptcha/core':
+        specifier: workspace:*
+        version: link:../../core
+
   packages/captchas/emoji-match:
     dependencies:
       '@funnycaptcha/core':
@@ -147,6 +159,12 @@ importers:
         version: link:../../core
 
   packages/captchas/mini-game:
+    dependencies:
+      '@funnycaptcha/core':
+        specifier: workspace:*
+        version: link:../../core
+
+  packages/captchas/puzzle:
     dependencies:
       '@funnycaptcha/core':
         specifier: workspace:*
@@ -192,6 +210,12 @@ importers:
       '@funnycaptcha/click-order':
         specifier: workspace:*
         version: link:../captchas/click-order
+      '@funnycaptcha/click-text':
+        specifier: workspace:*
+        version: link:../captchas/click-text
+      '@funnycaptcha/color-pick':
+        specifier: workspace:*
+        version: link:../captchas/color-pick
       '@funnycaptcha/core':
         specifier: workspace:*
         version: link:../core
@@ -207,6 +231,9 @@ importers:
       '@funnycaptcha/mini-game':
         specifier: workspace:*
         version: link:../captchas/mini-game
+      '@funnycaptcha/puzzle':
+        specifier: workspace:*
+        version: link:../captchas/puzzle
       '@funnycaptcha/rotate':
         specifier: workspace:*
         version: link:../captchas/rotate

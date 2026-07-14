@@ -1,7 +1,7 @@
 {
-  "name": "@funnycaptcha/spot-diff",
+  "name": "@funnycaptcha/puzzle",
   "version": "0.3.0",
-  "description": "Spot-the-difference captcha — FunnyChapter",
+  "description": "Puzzle captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -3,8 +3,8 @@ import { hashProof } from '@funnycaptcha/core';
 import { generateChallenge, verifyDiffs, type SpotDiffChallenge } from './challenge.js';
 
 const STR = {
-  zh: { title: '找出两处不同', hint: '点击右侧网格中不同的格子', found: '已找到', success: '验证成功', fail: '找得不对，再来一次' },
-  en: { title: 'Spot 2 differences', hint: 'Click the differing cells on the right grid', found: 'Found', success: 'Verified', fail: 'Not quite, try again' },
+  zh: { title: '找出两处不同', hint: '点击右侧网格中不同的格子', found: '已找到', success: '验证成功', fail: '找得不对，再来一次', refresh: '刷新' },
+  en: { title: 'Spot 2 differences', hint: 'Click the differing cells on the right grid', found: 'Found', success: 'Verified', fail: 'Not quite, try again', refresh: 'Refresh' },
 };
 
 export function createSpotDiffInstance(
@@ -12,6 +12,7 @@ export function createSpotDiffInstance(
   config: CaptchaConfig,
 ): CaptchaInstance {
   const t = STR[config.locale];
+  const theme = config.theme ?? 'light';
   let current: SpotDiffChallenge;
   let listeners: ((r: CaptchaResult) => void)[] = [];
   let startTime = Date.now();
@@ -30,20 +31,26 @@ export function createSpotDiffInstance(
     startTime = Date.now();
     container.innerHTML = `
       <style>
-        .fc-spot-diff{font-family:-apple-system,system-ui,sans-serif;width:360px;padding:16px;box-sizing:border-box}
-        .fc-spot-diff-title{font-size:14px;color:#333;margin-bottom:6px;text-align:center;font-weight:600}
-        .fc-spot-diff-hint{font-size:12px;color:#888;margin-bottom:12px;text-align:center}
+        .fc-spot-diff{font-family:-apple-system,system-ui,sans-serif;max-width:360px;width:100%;padding:16px;box-sizing:border-box}
+        .fc-spot-diff[data-theme="light"]{--fc-bg:#ffffff;--fc-surface:#f6f7f9;--fc-text:#0f172a;--fc-text-soft:#64748b;--fc-border:#e2e8f0;--fc-accent:#6366f1;--fc-accent-soft:#eef2ff;--fc-success:#16a34a;--fc-danger:#dc2626}
+        .fc-spot-diff[data-theme="dark"]{--fc-bg:#1e2544;--fc-surface:#171c36;--fc-text:#e5e9f0;--fc-text-soft:#94a3b8;--fc-border:#2a3358;--fc-accent:#818cf8;--fc-accent-soft:#252b5c;--fc-success:#4ade80;--fc-danger:#f87171}
+        .fc-spot-diff{background:var(--fc-bg);border:1px solid var(--fc-border);border-radius:10px;color:var(--fc-text)}
+        .fc-spot-diff-title{font-size:14px;color:var(--fc-text);margin-bottom:6px;text-align:center;font-weight:600}
+        .fc-spot-diff-hint{font-size:12px;color:var(--fc-text-soft);margin-bottom:12px;text-align:center}
         .fc-spot-diff-grids{display:flex;gap:16px;justify-content:center}
-        .fc-spot-diff-grid{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px);gap:4px;background:#f5f5f5;padding:8px;border-radius:8px;border:1px solid #e0e0e0}
-        .fc-spot-diff-cell{display:flex;align-items:center;justify-content:center;font-size:26px;background:#fff;border-radius:6px;user-select:none}
+        .fc-spot-diff-grid{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px);gap:4px;background:var(--fc-surface);padding:8px;border-radius:8px;border:1px solid var(--fc-border)}
+        .fc-spot-diff-cell{display:flex;align-items:center;justify-content:center;font-size:26px;background:var(--fc-bg);border-radius:6px;user-select:none}
         .fc-spot-diff-clickable{cursor:pointer;transition:transform .12s,box-shadow .12s}
         .fc-spot-diff-clickable:hover{transform:scale(1.06)}
-        .fc-spot-diff-marked{box-shadow:0 0 0 3px #4a90d9 inset;background:#eaf3ff}
-        .fc-spot-diff-wrong{box-shadow:0 0 0 3px #e53935 inset;background:#fdecea}
-        .fc-spot-diff-status{font-size:13px;min-height:18px;text-align:center;margin-top:12px;color:#2e7d32}
-        .fc-spot-diff-status-fail{color:#e53935}
+        .fc-spot-diff-marked{box-shadow:0 0 0 3px var(--fc-accent) inset;background:var(--fc-accent-soft)}
+        .fc-spot-diff-wrong{box-shadow:0 0 0 3px var(--fc-danger) inset;background:var(--fc-danger)}
+        .fc-spot-diff-status{font-size:13px;min-height:18px;text-align:center;margin-top:12px;color:var(--fc-success)}
+        .fc-spot-diff-status-fail{color:var(--fc-danger)}
+        .fc-spot-diff-row{display:flex;justify-content:center;margin-top:8px}
+        .fc-spot-diff-refresh{padding:4px 12px;font-size:12px;border:1px solid var(--fc-border);background:var(--fc-surface);color:var(--fc-text-soft);border-radius:6px;cursor:pointer}
+        .fc-spot-diff-refresh:hover{border-color:var(--fc-accent);color:var(--fc-accent)}
       </style>
-      <div class="fc-spot-diff">
+      <div class="fc-spot-diff" data-theme="${theme}">
         <div class="fc-spot-diff-title">${t.title}</div>
         <div class="fc-spot-diff-hint">${t.hint}</div>
         <div class="fc-spot-diff-grids">
@@ -51,10 +58,15 @@ export function createSpotDiffInstance(
           <div class="fc-spot-diff-grid fc-spot-diff-grid-b">${renderGrid(current.gridB, true)}</div>
         </div>
         <div class="fc-spot-diff-status">${t.found} 0/${current.diffs.length}</div>
+        <div class="fc-spot-diff-row">
+          <button class="fc-spot-diff-refresh">${t.refresh}</button>
+        </div>
       </div>
     `;
     const gridB = container.querySelector('.fc-spot-diff-grid-b') as HTMLDivElement;
     const status = container.querySelector('.fc-spot-diff-status') as HTMLDivElement;
+    const refreshBtn = container.querySelector('.fc-spot-diff-refresh') as HTMLButtonElement;
+    refreshBtn.addEventListener('click', render);
 
     gridB.querySelectorAll('.fc-spot-diff-clickable').forEach(el => {
       el.addEventListener('click', async () => {

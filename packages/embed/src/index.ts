@@ -10,6 +10,9 @@ import '@funnycaptcha/emoji-match';
 import '@funnycaptcha/meme-quiz';
 import '@funnycaptcha/mini-game';
 import '@funnycaptcha/anti-bot';
+import '@funnycaptcha/click-text';
+import '@funnycaptcha/color-pick';
+import '@funnycaptcha/puzzle';
 import type { CaptchaInstance } from '@funnycaptcha/core';
 
 const instances = new Map<HTMLElement, CaptchaInstance>();

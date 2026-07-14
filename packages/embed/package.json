@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/embed",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Script-tag embeddable FunnyChapter bundle",
   "type": "module",
   "main": "./dist/embed.js",
@@ -24,7 +24,10 @@
     "@funnycaptcha/emoji-match": "workspace:*",
     "@funnycaptcha/meme-quiz": "workspace:*",
     "@funnycaptcha/mini-game": "workspace:*",
-    "@funnycaptcha/anti-bot": "workspace:*"
+    "@funnycaptcha/anti-bot": "workspace:*",
+    "@funnycaptcha/click-text": "workspace:*",
+    "@funnycaptcha/color-pick": "workspace:*",
+    "@funnycaptcha/puzzle": "workspace:*"
   },
   "publishConfig": {
     "access": "public",

@@ -111,7 +111,10 @@ function getDemoHTML(): string {
       { type: 'emoji-match', zh: '表情匹配', en: 'Emoji Match', descZh: '选出匹配的 emoji', descEn: 'Pick matching emoji' },
       { type: 'meme-quiz', zh: '梗图问答', en: 'Meme Quiz', descZh: '看梗图选梗名', descEn: 'Pick the right meme' },
       { type: 'mini-game', zh: '迷你游戏', en: 'Mini Game', descZh: '30 秒打地鼠达 10 分', descEn: 'Whack-a-mole, score 10 in 30s' },
-      { type: 'anti-bot', zh: '反人类讽刺', en: 'Anti-Bot Satire', descZh: '机器人注入 JS 就能通过', descEn: 'Bots can inject JS to pass' }
+      { type: 'anti-bot', zh: '反人类讽刺', en: 'Anti-Bot Satire', descZh: '机器人注入 JS 就能通过', descEn: 'Bots can inject JS to pass' },
+      { type: 'click-text', zh: '文字点选', en: 'Click Text', descZh: '按顺序点击指定汉字', descEn: 'Click characters in order' },
+      { type: 'color-pick', zh: '颜色选择', en: 'Color Pick', descZh: '点击指定颜色的方块', descEn: 'Pick the right color' },
+      { type: 'puzzle', zh: '拼图缺口', en: 'Puzzle Gap', descZh: '拖动拼图到缺口位置', descEn: 'Drag puzzle to the gap' }
     ];
     var locale = 'zh';
     var theme = 'dark';
@@ -125,7 +128,7 @@ function getDemoHTML(): string {
         card.innerHTML =
           '<h3 class="card-title">' + (locale === 'zh' ? item.zh : item.en) + '</h3>' +
           '<p class="card-desc">' + (locale === 'zh' ? item.descZh : item.descEn) + '</p>' +
-          '<div class="fc-demo" data-funny-captcha="' + item.type + '" data-locale="' + locale + '" data-theme="' + theme + '"></div>';
+          '<div class="fc-demo" data-funny-captcha data-type="' + item.type + '" data-locale="' + locale + '" data-theme="' + theme + '"></div>';
         grid.appendChild(card);
       });
       // 重新扫描挂载

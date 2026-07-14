@@ -33,6 +33,7 @@ export function createAntiBotInstance(
   config: CaptchaConfig,
 ): CaptchaInstance {
   const t = STR[config.locale];
+  const theme = config.theme ?? 'light';
   let current: AntiBotChallenge;
   let listeners: ((r: CaptchaResult) => void)[] = [];
   let startTime = Date.now();
@@ -64,17 +65,20 @@ export function createAntiBotInstance(
     if (verifyTimer) { clearTimeout(verifyTimer); verifyTimer = null; }
     container.innerHTML = `
       <style>
-        .fc-anti-bot{font-family:-apple-system,system-ui,sans-serif;width:320px;padding:20px;box-sizing:border-box;border:1px solid #e0e0e0;border-radius:10px;background:#fafafa}
-        .fc-anti-bot-title{font-size:18px;color:#333;text-align:center;font-weight:600;margin-bottom:6px}
-        .fc-anti-bot-subtitle{font-size:12px;color:#888;text-align:center;margin-bottom:16px}
-        .fc-anti-bot-btn{display:block;width:100%;padding:12px;font-size:15px;border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer;color:#333;transition:background .15s}
-        .fc-anti-bot-btn:hover:not(:disabled){background:#f0f7ff}
-        .fc-anti-bot-btn:disabled{cursor:default;color:#2e7d32;border-color:#2e7d32;background:#e8f5e9}
-        .fc-anti-bot-msg{font-size:13px;min-height:18px;text-align:center;margin-top:12px;color:#2e7d32}
-        .fc-anti-bot-hint{font-size:11px;color:#bbb;margin-top:14px;text-align:center;line-height:1.5;font-style:italic}
-        .fc-anti-bot-footer{font-size:10px;color:#ccc;margin-top:8px;text-align:center}
+        .fc-anti-bot{font-family:-apple-system,system-ui,sans-serif;max-width:360px;width:100%;padding:20px;box-sizing:border-box;border:1px solid var(--fc-border);border-radius:10px;background:var(--fc-surface)}
+        .fc-anti-bot[data-theme="light"]{--fc-bg:#ffffff;--fc-surface:#f6f7f9;--fc-text:#0f172a;--fc-text-soft:#64748b;--fc-border:#e2e8f0;--fc-accent:#6366f1;--fc-accent-soft:#eef2ff;--fc-success:#16a34a;--fc-danger:#dc2626}
+        .fc-anti-bot[data-theme="dark"]{--fc-bg:#1e2544;--fc-surface:#171c36;--fc-text:#e5e9f0;--fc-text-soft:#94a3b8;--fc-border:#2a3358;--fc-accent:#818cf8;--fc-accent-soft:#252b5c;--fc-success:#4ade80;--fc-danger:#f87171}
+        .fc-anti-bot{color:var(--fc-text)}
+        .fc-anti-bot-title{font-size:18px;color:var(--fc-text);text-align:center;font-weight:600;margin-bottom:6px}
+        .fc-anti-bot-subtitle{font-size:12px;color:var(--fc-text-soft);text-align:center;margin-bottom:16px}
+        .fc-anti-bot-btn{display:block;width:100%;padding:12px;font-size:15px;border:1px solid var(--fc-border);background:var(--fc-bg);border-radius:6px;cursor:pointer;color:var(--fc-text);transition:background .15s,border-color .15s}
+        .fc-anti-bot-btn:hover:not(:disabled){background:var(--fc-accent-soft);border-color:var(--fc-accent)}
+        .fc-anti-bot-btn:disabled{cursor:default;color:var(--fc-success);border-color:var(--fc-success);background:var(--fc-accent-soft)}
+        .fc-anti-bot-msg{font-size:13px;min-height:18px;text-align:center;margin-top:12px;color:var(--fc-success)}
+        .fc-anti-bot-hint{font-size:11px;color:var(--fc-text-soft);margin-top:14px;text-align:center;line-height:1.5;font-style:italic}
+        .fc-anti-bot-footer{font-size:10px;color:var(--fc-text-soft);margin-top:8px;text-align:center;opacity:.7}
       </style>
-      <div class="fc-anti-bot">
+      <div class="fc-anti-bot" data-theme="${theme}">
         <div class="fc-anti-bot-title">${t.title}</div>
         <div class="fc-anti-bot-subtitle">${t.subtitle}</div>
         <button class="fc-anti-bot-btn">${t.btn}</button>
