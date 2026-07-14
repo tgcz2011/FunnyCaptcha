@@ -2,6 +2,14 @@ import { scan } from './scanner.js';
 import { mountInto } from './iframe-host.js';
 import '@funnycaptcha/math';
 import '@funnycaptcha/text-distort';
+import '@funnycaptcha/slider';
+import '@funnycaptcha/click-order';
+import '@funnycaptcha/rotate';
+import '@funnycaptcha/spot-diff';
+import '@funnycaptcha/emoji-match';
+import '@funnycaptcha/meme-quiz';
+import '@funnycaptcha/mini-game';
+import '@funnycaptcha/anti-bot';
 import type { CaptchaInstance } from '@funnycaptcha/core';
 
 const instances = new Map<HTMLElement, CaptchaInstance>();

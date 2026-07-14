@@ -176,16 +176,46 @@ importers:
         specifier: workspace:*
         version: link:../../core
 
+  packages/cli:
+    dependencies:
+      '@funnycaptcha/embed':
+        specifier: workspace:*
+        version: link:../embed
+
   packages/core: {}
 
   packages/embed:
     dependencies:
+      '@funnycaptcha/anti-bot':
+        specifier: workspace:*
+        version: link:../captchas/anti-bot
+      '@funnycaptcha/click-order':
+        specifier: workspace:*
+        version: link:../captchas/click-order
       '@funnycaptcha/core':
         specifier: workspace:*
         version: link:../core
+      '@funnycaptcha/emoji-match':
+        specifier: workspace:*
+        version: link:../captchas/emoji-match
       '@funnycaptcha/math':
         specifier: workspace:*
         version: link:../captchas/math
+      '@funnycaptcha/meme-quiz':
+        specifier: workspace:*
+        version: link:../captchas/meme-quiz
+      '@funnycaptcha/mini-game':
+        specifier: workspace:*
+        version: link:../captchas/mini-game
+      '@funnycaptcha/rotate':
+        specifier: workspace:*
+        version: link:../captchas/rotate
+      '@funnycaptcha/slider':
+        specifier: workspace:*
+        version: link:../captchas/slider
+      '@funnycaptcha/spot-diff':
+        specifier: workspace:*
+        version: link:../captchas/spot-diff
       '@funnycaptcha/text-distort':
         specifier: workspace:*
         version: link:../captchas/text-distort

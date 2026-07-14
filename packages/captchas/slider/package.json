@@ -1,6 +1,6 @@
 {
   "name": "@funnycaptcha/slider",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Slider captcha — FunnyChapter",
   "type": "module",
   "main": "./dist/index.js",
@@ -12,5 +12,9 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": { "@funnycaptcha/core": "workspace:*" }
+  "dependencies": { "@funnycaptcha/core": "workspace:*" },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
 }
